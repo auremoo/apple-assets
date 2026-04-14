@@ -315,12 +315,17 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .header-left h2 {
     font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-apple {
@@ -332,6 +337,7 @@ body {
     display: flex;
     align-items: center;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 #current-user {
@@ -880,21 +886,41 @@ body {
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
     .app-header {
-        padding: 0 20px;
+        padding: 0 16px;
+        height: 48px;
     }
 
     .header-left h2 {
         font-size: 15px;
     }
 
+    .header-right {
+        gap: 2px;
+    }
+
+    #current-user {
+        display: none;
+    }
+
+    .btn-icon {
+        padding: 6px;
+    }
+
+    .btn-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
     .app-nav {
-        padding: 10px 20px;
+        padding: 8px 12px;
         gap: 2px;
     }
 
     .nav-btn {
-        padding: 6px 14px;
-        font-size: 12px;
+        padding: 7px 14px;
+        font-size: 13px;
+        flex: 1;
+        justify-content: center;
     }
 
     .nav-btn svg {
@@ -902,12 +928,25 @@ body {
     }
 
     .app-main {
-        padding: 20px;
+        padding: 16px;
     }
 
     .collection-grid {
         grid-template-columns: 1fr;
         gap: 12px;
+    }
+
+    .device-card {
+        padding: 16px;
+    }
+
+    .device-card-placeholder {
+        height: 100px;
+        font-size: 44px;
+    }
+
+    .device-card-model {
+        font-size: 17px;
     }
 
     .form-row {
@@ -916,13 +955,28 @@ body {
     }
 
     .modal-content {
-        margin: 12px;
-        max-height: 88vh;
+        margin: 8px;
+        max-height: 92vh;
         border-radius: var(--radius);
     }
 
+    .modal-header {
+        padding: 18px 20px 14px;
+    }
+
     .modal-body {
-        padding: 20px;
+        padding: 16px 20px;
+    }
+
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px 14px;
+        font-size: 16px;
     }
 
     .stats-grid {
@@ -931,41 +985,116 @@ body {
     }
 
     .stat-card {
-        padding: 20px 16px;
+        padding: 20px 12px;
     }
 
     .stat-value {
-        font-size: 24px;
+        font-size: 22px;
     }
 
-    .auth-container {
-        margin: 20px;
-        padding: 40px 28px;
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .stats-section {
+        padding: 20px 16px;
     }
 
     .bar-label {
-        width: 80px;
+        width: 72px;
         font-size: 12px;
     }
 
+    .bar-track {
+        height: 24px;
+    }
+
+    .auth-container {
+        margin: 16px;
+        padding: 36px 24px;
+    }
+
+    .auth-container h1 {
+        font-size: 24px;
+    }
+
+    .auth-subtitle {
+        font-size: 14px;
+        margin-bottom: 28px;
+    }
+
+    .timeline {
+        padding-left: 36px;
+    }
+
+    .timeline::before {
+        left: 15px;
+    }
+
+    .timeline-dot {
+        left: -29px;
+    }
+
+    .timeline-card {
+        padding: 14px 16px;
+    }
+
+    .timeline-model {
+        font-size: 15px;
+    }
+
+    .collection-empty {
+        padding: 80px 20px;
+    }
+
     .fab {
-        bottom: 24px;
-        right: 24px;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .fab svg {
+        width: 20px;
+        height: 20px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 380px) {
+    .app-header {
+        padding: 0 12px;
+    }
+
+    .header-left h2 {
+        font-size: 14px;
+    }
+
+    .header-apple {
+        width: 14px;
+        height: 17px;
+    }
+
+    .nav-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
     .stats-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-value {
+        font-size: 20px;
+    }
+
+    .auth-container {
+        margin: 12px;
+        padding: 28px 20px;
     }
 
     .auth-buttons {
         flex-direction: column;
-    }
-
-    .header-right .btn-ghost {
-        font-size: 12px;
-        padding: 6px 10px;
     }
 }
 
