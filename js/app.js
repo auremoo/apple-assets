@@ -1,3 +1,4 @@
+// My Apple Collection — Auteur : Aurélien Moote - Moo - 2026 — Licence MIT
 // ===== App Controller =====
 const App = {
     currentView: 'collection',

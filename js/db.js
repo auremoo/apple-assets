@@ -1,3 +1,4 @@
+// My Apple Collection — Auteur : Aurélien Moote - Moo - 2026 — Licence MIT
 // Database module using sql.js (SQLite in WebAssembly)
 const DB = {
     instance: null,

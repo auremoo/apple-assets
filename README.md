@@ -1,3 +1,6 @@
+> Créé par Aurélien Moote - Moo - 2026. Logiciel libre (licence MIT) :
+> réutilisable à condition de conserver la mention de l'auteur.
+
 # My Apple Collection
 
 Une web app pour recenser tous les appareils Apple que vous avez possédés dans votre vie.
@@ -32,3 +35,10 @@ L'application est déployée automatiquement sur GitHub Pages via GitHub Actions
 ## Données
 
 Toutes les données sont stockées **localement dans votre navigateur** (localStorage). Pensez à utiliser la fonction Export pour sauvegarder vos données.
+
+## Auteur & licence
+
+**Aurélien Moote - Moo - 2026**
+
+Copyright (c) 2026 Aurélien Moote ("Moo") — Licence MIT.
+Réutilisable librement à condition de conserver la mention de l'auteur.
