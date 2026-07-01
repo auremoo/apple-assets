@@ -22,13 +22,16 @@
                 <h2>My Apple Collection</h2>
             </div>
             <div class="header-right">
-                <button id="btn-export" class="btn btn-icon" title="Exporter">
+                <button id="btn-export" class="btn btn-icon" title="Sauvegarder (DataSafe si configuré, sinon fichier local)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
                 <button id="btn-import" class="btn btn-icon" title="Importer">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </button>
                 <input type="file" id="import-file" accept=".json" style="display:none">
+                <button id="btn-datasafe" class="btn btn-icon" title="Sauvegarde DataSafe">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+                </button>
             </div>
         </header>
 
@@ -181,8 +184,49 @@
         </div>
     </div>
 
+    <!-- DataSafe Settings Modal -->
+    <div id="datasafe-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sauvegarde DataSafe</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="datasafe-form" class="modal-body">
+                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">
+                    Configurez votre compte DataSafe pour sauvegarder automatiquement vos données à chaque modification.
+                    Ces informations restent uniquement sur cet appareil (jamais dans le code ni dans vos exports JSON).
+                </p>
+
+                <div class="form-group">
+                    <label>URL de l'endpoint</label>
+                    <input type="url" id="datasafe-url" placeholder="https://exemple.prp/api/data-safe/ingest">
+                </div>
+                <div class="form-group">
+                    <label>Clé API</label>
+                    <input type="password" id="datasafe-key" placeholder="Bearer token" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Nom de l'app</label>
+                    <input type="text" id="datasafe-appname" placeholder="my-apple-collection">
+                </div>
+
+                <p id="datasafe-status" class="datasafe-status"></p>
+
+                <div class="modal-footer">
+                    <button type="button" id="btn-datasafe-disable" class="btn btn-danger">Désactiver</button>
+                    <div class="modal-footer-right">
+                        <button type="button" class="btn btn-secondary modal-close">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
     <script src="js/db.js"></script>
+    <script src="js/datasafe.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

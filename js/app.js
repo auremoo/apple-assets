@@ -21,7 +21,7 @@ const App = {
 
         // Modal close
         document.querySelectorAll('.modal-close, .modal-backdrop').forEach(el => {
-            el.addEventListener('click', () => this.closeModal());
+            el.addEventListener('click', (e) => this.closeModal(e.target.closest('.modal')));
         });
 
         // Device form
@@ -39,6 +39,14 @@ const App = {
             document.getElementById('import-file').click();
         });
         document.getElementById('import-file').addEventListener('change', (e) => this.importData(e));
+
+        // DataSafe
+        document.getElementById('btn-datasafe').addEventListener('click', () => this.openDataSafeModal());
+        document.getElementById('datasafe-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveDataSafeConfig();
+        });
+        document.getElementById('btn-datasafe-disable').addEventListener('click', () => this.disableDataSafe());
 
         // Close modal on Escape
         document.addEventListener('keydown', (e) => {
@@ -321,8 +329,12 @@ const App = {
         modal.classList.add('active');
     },
 
-    closeModal() {
-        document.getElementById('device-modal').classList.remove('active');
+    closeModal(modal) {
+        if (modal) {
+            modal.classList.remove('active');
+        } else {
+            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+        }
     },
 
     saveDevice() {
@@ -351,6 +363,7 @@ const App = {
 
         this.closeModal();
         this.renderCurrentView();
+        DataSafe.push(DB.getDevices());
     },
 
     deleteDevice() {
@@ -361,11 +374,23 @@ const App = {
             DB.deleteDevice(parseInt(id));
             this.closeModal();
             this.renderCurrentView();
+            DataSafe.push(DB.getDevices());
         }
     },
 
     // --- Export / Import ---
-    exportData() {
+    // Sauvegarde le JSON vers DataSafe si configuré, sinon le télécharge
+    // localement. En cas d'échec réseau vers DataSafe, on retombe sur le
+    // téléchargement local plutôt que de perdre la sauvegarde.
+    async exportData() {
+        if (DataSafe.isConfigured()) {
+            const result = await DataSafe.push(DB.getDevices());
+            if (result && result.success) return;
+        }
+        this.downloadLocalBackup();
+    },
+
+    downloadLocalBackup() {
         const json = DB.exportData();
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -386,12 +411,61 @@ const App = {
                 const count = DB.importData(e.target.result);
                 alert(`${count} appareil(s) importé(s) avec succès !`);
                 this.renderCurrentView();
+                DataSafe.push(DB.getDevices());
             } catch (err) {
                 alert('Erreur lors de l\'import : ' + err.message);
             }
         };
         reader.readAsText(file);
         event.target.value = '';
+    },
+
+    // --- DataSafe ---
+    openDataSafeModal() {
+        const config = DataSafe.getConfig() || {};
+        document.getElementById('datasafe-url').value = config.url || '';
+        document.getElementById('datasafe-key').value = config.apiKey || '';
+        document.getElementById('datasafe-appname').value = config.appName || 'my-apple-collection';
+
+        const status = document.getElementById('datasafe-status');
+        status.className = 'datasafe-status';
+        status.textContent = DataSafe.isConfigured()
+            ? 'Sauvegarde automatique active.'
+            : 'Non configuré : les données ne sont sauvegardées que localement.';
+
+        document.getElementById('datasafe-modal').classList.add('active');
+    },
+
+    async saveDataSafeConfig() {
+        const url = document.getElementById('datasafe-url').value.trim();
+        const apiKey = document.getElementById('datasafe-key').value.trim();
+        const appName = document.getElementById('datasafe-appname').value.trim() || 'my-apple-collection';
+        const status = document.getElementById('datasafe-status');
+
+        if (!url || !apiKey) {
+            status.className = 'datasafe-status error';
+            status.textContent = 'URL et clé API requises.';
+            return;
+        }
+
+        DataSafe.setConfig({ url, apiKey, appName });
+
+        status.className = 'datasafe-status';
+        status.textContent = 'Test de connexion...';
+        const result = await DataSafe.push(DB.getDevices());
+
+        if (result && result.success) {
+            status.className = 'datasafe-status success';
+            status.textContent = `Connecté (${result.versions ?? '?'} version(s) sauvegardée(s)).`;
+        } else {
+            status.className = 'datasafe-status error';
+            status.textContent = 'Configuration enregistrée, mais le test de connexion a échoué. Nouvelle tentative à la prochaine modification.';
+        }
+    },
+
+    disableDataSafe() {
+        DataSafe.clearConfig();
+        this.closeModal();
     },
 
     // --- Utility ---

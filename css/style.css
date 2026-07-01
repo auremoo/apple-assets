@@ -130,6 +130,21 @@ body {
     color: var(--accent);
 }
 
+.datasafe-status {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: -8px;
+    margin-bottom: 16px;
+    min-height: 18px;
+}
+.datasafe-status.success {
+    color: var(--success);
+}
+.datasafe-status.error {
+    color: var(--danger);
+}
+
 .btn-danger {
     background: transparent;
     color: var(--danger);
