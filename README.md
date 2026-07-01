@@ -10,7 +10,7 @@ Une web app pour recenser tous les appareils Apple que vous avez possédés dans
 - **Collection** : vue en grille de tous vos appareils avec fiche détaillée
 - **Timeline** : frise chronologique de vos appareils
 - **Statistiques** : nombre d'appareils, dépenses, durée de possession, répartition par type
-- **Multi-utilisateur** : gestion de comptes simple (pseudo + mot de passe, stocké localement)
+- **Sans compte** : aucune inscription requise, tout est stocké localement dans votre navigateur
 - **Export/Import** : sauvegardez et restaurez vos données en JSON
 - **100% client-side** : aucun serveur, fonctionne sur GitHub Pages
 
@@ -24,9 +24,8 @@ Une web app pour recenser tous les appareils Apple que vous avez possédés dans
 ## Utilisation
 
 1. Ouvrir l'app dans un navigateur
-2. Créer un compte (pseudo + mot de passe)
-3. Ajouter vos appareils avec le bouton **+**
-4. Naviguer entre les vues Collection, Timeline et Stats
+2. Ajouter vos appareils avec le bouton **+**
+3. Naviguer entre les vues Collection, Timeline et Stats
 
 ## Déploiement
 

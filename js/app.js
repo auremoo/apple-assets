@@ -6,48 +6,11 @@ const App = {
     async init() {
         await DB.init();
         this.bindEvents();
-        this.checkSession();
-    },
-
-    // --- Session ---
-    checkSession() {
-        const saved = sessionStorage.getItem('apple_collection_user');
-        if (saved) {
-            try {
-                const user = JSON.parse(saved);
-                DB.login(user.username, user.password);
-                this.showApp();
-            } catch {
-                this.showAuth();
-            }
-        } else {
-            this.showAuth();
-        }
-    },
-
-    showAuth() {
-        document.getElementById('auth-screen').classList.add('active');
-        document.getElementById('app-screen').classList.remove('active');
-        document.getElementById('auth-username').focus();
-    },
-
-    showApp() {
-        document.getElementById('auth-screen').classList.remove('active');
-        document.getElementById('app-screen').classList.add('active');
-        document.getElementById('current-user').textContent = DB.currentUser.username;
         this.renderCurrentView();
     },
 
     // --- Events ---
     bindEvents() {
-        // Auth
-        document.getElementById('btn-login').addEventListener('click', () => this.handleLogin());
-        document.getElementById('btn-register').addEventListener('click', () => this.handleRegister());
-        document.getElementById('auth-password').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') this.handleLogin();
-        });
-        document.getElementById('btn-logout').addEventListener('click', () => this.handleLogout());
-
         // Navigation
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => this.switchView(btn.dataset.view));
@@ -81,45 +44,6 @@ const App = {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') this.closeModal();
         });
-    },
-
-    // --- Auth Handlers ---
-    handleLogin() {
-        const username = document.getElementById('auth-username').value.trim();
-        const password = document.getElementById('auth-password').value;
-        const errorEl = document.getElementById('auth-error');
-
-        try {
-            DB.login(username, password);
-            sessionStorage.setItem('apple_collection_user', JSON.stringify({ username, password }));
-            errorEl.textContent = '';
-            this.showApp();
-        } catch (e) {
-            errorEl.textContent = e.message;
-        }
-    },
-
-    handleRegister() {
-        const username = document.getElementById('auth-username').value.trim();
-        const password = document.getElementById('auth-password').value;
-        const errorEl = document.getElementById('auth-error');
-
-        try {
-            DB.register(username, password);
-            sessionStorage.setItem('apple_collection_user', JSON.stringify({ username, password }));
-            errorEl.textContent = '';
-            this.showApp();
-        } catch (e) {
-            errorEl.textContent = e.message;
-        }
-    },
-
-    handleLogout() {
-        DB.logout();
-        sessionStorage.removeItem('apple_collection_user');
-        document.getElementById('auth-username').value = '';
-        document.getElementById('auth-password').value = '';
-        this.showAuth();
     },
 
     // --- Navigation ---
@@ -447,7 +371,7 @@ const App = {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `apple-collection-${DB.currentUser.username}-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `apple-collection-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
     },

@@ -2,7 +2,6 @@
 // Database module using sql.js (SQLite in WebAssembly)
 const DB = {
     instance: null,
-    currentUser: null,
 
     async init() {
         const SQL = await initSqlJs({
@@ -24,18 +23,8 @@ const DB = {
 
     createTables() {
         this.instance.run(`
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                created_at TEXT DEFAULT (datetime('now'))
-            );
-        `);
-
-        this.instance.run(`
             CREATE TABLE IF NOT EXISTS devices (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
                 type TEXT NOT NULL,
                 model TEXT NOT NULL,
                 color TEXT,
@@ -50,8 +39,7 @@ const DB = {
                 image_url TEXT,
                 notes TEXT,
                 created_at TEXT DEFAULT (datetime('now')),
-                updated_at TEXT DEFAULT (datetime('now')),
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                updated_at TEXT DEFAULT (datetime('now'))
             );
         `);
 
@@ -64,54 +52,14 @@ const DB = {
         localStorage.setItem('apple_collection_db', JSON.stringify(arr));
     },
 
-    // --- User Management ---
-    register(username, password) {
-        if (!username || !password) throw new Error('Pseudo et mot de passe requis');
-        if (username.length < 2) throw new Error('Pseudo trop court (min 2 caractères)');
-        if (password.length < 3) throw new Error('Mot de passe trop court (min 3 caractères)');
-
-        const existing = this.instance.exec('SELECT id FROM users WHERE username = ?', [username]);
-        if (existing.length > 0 && existing[0].values.length > 0) {
-            throw new Error('Ce pseudo est déjà pris');
-        }
-
-        this.instance.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, password]);
-        this.save();
-
-        const result = this.instance.exec('SELECT id, username FROM users WHERE username = ?', [username]);
-        this.currentUser = { id: result[0].values[0][0], username: result[0].values[0][1] };
-        return this.currentUser;
-    },
-
-    login(username, password) {
-        if (!username || !password) throw new Error('Pseudo et mot de passe requis');
-
-        const result = this.instance.exec(
-            'SELECT id, username FROM users WHERE username = ? AND password = ?',
-            [username, password]
-        );
-
-        if (result.length === 0 || result[0].values.length === 0) {
-            throw new Error('Pseudo ou mot de passe incorrect');
-        }
-
-        this.currentUser = { id: result[0].values[0][0], username: result[0].values[0][1] };
-        return this.currentUser;
-    },
-
-    logout() {
-        this.currentUser = null;
-    },
-
     // --- Device CRUD ---
     addDevice(device) {
         this.instance.run(`
-            INSERT INTO devices (user_id, type, model, color, storage, serial_number,
+            INSERT INTO devices (type, model, color, storage, serial_number,
                 date_acquired, date_released, acquisition_mode, status,
                 price_buy, price_sell, image_url, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            this.currentUser.id,
             device.type, device.model, device.color, device.storage,
             device.serial_number, device.date_acquired, device.date_released,
             device.acquisition_mode, device.status,
@@ -128,28 +76,25 @@ const DB = {
                 date_acquired = ?, date_released = ?, acquisition_mode = ?, status = ?,
                 price_buy = ?, price_sell = ?, image_url = ?, notes = ?,
                 updated_at = datetime('now')
-            WHERE id = ? AND user_id = ?
+            WHERE id = ?
         `, [
             device.type, device.model, device.color, device.storage,
             device.serial_number, device.date_acquired, device.date_released,
             device.acquisition_mode, device.status,
             device.price_buy || null, device.price_sell || null,
             device.image_url, device.notes,
-            id, this.currentUser.id
+            id
         ]);
         this.save();
     },
 
     deleteDevice(id) {
-        this.instance.run('DELETE FROM devices WHERE id = ? AND user_id = ?', [id, this.currentUser.id]);
+        this.instance.run('DELETE FROM devices WHERE id = ?', [id]);
         this.save();
     },
 
     getDevices() {
-        const result = this.instance.exec(
-            'SELECT * FROM devices WHERE user_id = ? ORDER BY date_acquired DESC',
-            [this.currentUser.id]
-        );
+        const result = this.instance.exec('SELECT * FROM devices ORDER BY date_acquired DESC');
         if (result.length === 0) return [];
         return result[0].values.map(row => {
             const cols = result[0].columns;
@@ -160,10 +105,7 @@ const DB = {
     },
 
     getDevice(id) {
-        const result = this.instance.exec(
-            'SELECT * FROM devices WHERE id = ? AND user_id = ?',
-            [id, this.currentUser.id]
-        );
+        const result = this.instance.exec('SELECT * FROM devices WHERE id = ?', [id]);
         if (result.length === 0 || result[0].values.length === 0) return null;
         const cols = result[0].columns;
         const obj = {};
@@ -228,7 +170,6 @@ const DB = {
         return JSON.stringify({
             version: 1,
             exportDate: new Date().toISOString(),
-            user: this.currentUser.username,
             devices
         }, null, 2);
     },
