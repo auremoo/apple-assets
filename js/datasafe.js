@@ -1,8 +1,10 @@
 // My Apple Collection — Auteur : Aurélien Moote - Moo - 2026 — Licence MIT
 // ===== DataSafe backup =====
-// Config (URL, clé API, nom d'app) saisie par l'utilisateur et stockée
-// uniquement dans son localStorage : jamais dans le code source, jamais
-// dans les fichiers JSON exportés/importés.
+// Config (URL, clé API, nom d'app) saisie par l'utilisateur et stockée dans
+// son localStorage, jamais codée en dur dans le code source. Si configurée,
+// elle est aussi embarquée dans le bloc _datasafe des sauvegardes JSON
+// (push et téléchargement local) pour qu'un réimport restaure automatiquement
+// la config et permette de repousser sans tout ressaisir.
 const DataSafe = {
     CONFIG_KEY: 'apple_collection_datasafe_config',
 
@@ -28,17 +30,43 @@ const DataSafe = {
         return !!(c && c.url && c.apiKey);
     },
 
+    // Construit le JSON de sauvegarde (utilisé pour le push et le
+    // téléchargement local). Inclut le bloc _datasafe si configuré, pour
+    // que le fichier soit auto-portant.
+    buildPayload(devices) {
+        const config = this.getConfig();
+        const payload = {
+            version: 1,
+            exportDate: new Date().toISOString(),
+            devices
+        };
+        if (config && config.url && config.apiKey) {
+            payload._datasafe = {
+                apiKey: config.apiKey,
+                url: config.url,
+                appName: config.appName || 'my-apple-collection'
+            };
+        }
+        return payload;
+    },
+
+    // Si le JSON réimporté contient un bloc _datasafe, restaure la config
+    // localement pour que les prochains push repartent sans reconfiguration.
+    restoreConfigFromPayload(data) {
+        if (data && data._datasafe && data._datasafe.url && data._datasafe.apiKey) {
+            this.setConfig(data._datasafe);
+            return true;
+        }
+        return false;
+    },
+
     // Envoie les données vers DataSafe. Échoue silencieusement : un souci
     // réseau ne doit jamais bloquer ou perturber l'usage de l'app.
     async push(devices) {
         const config = this.getConfig();
         if (!config || !config.url || !config.apiKey) return null;
 
-        const payload = {
-            version: 1,
-            exportDate: new Date().toISOString(),
-            devices
-        };
+        const payload = this.buildPayload(devices);
 
         try {
             const res = await fetch(config.url, {

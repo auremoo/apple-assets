@@ -195,7 +195,9 @@
             <form id="datasafe-form" class="modal-body">
                 <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">
                     Configurez votre compte DataSafe pour sauvegarder automatiquement vos données à chaque modification.
-                    Ces informations restent uniquement sur cet appareil (jamais dans le code ni dans vos exports JSON).
+                    Cette configuration n'est jamais codée en dur dans l'app : elle est saisie ici et stockée sur cet appareil.
+                    Si elle est active, votre clé API est aussi incluse dans vos sauvegardes JSON (push et téléchargement)
+                    afin qu'un réimport restaure automatiquement la connexion — gardez donc ces fichiers en lieu sûr.
                 </p>
 
                 <div class="form-group">

@@ -391,7 +391,8 @@ const App = {
     },
 
     downloadLocalBackup() {
-        const json = DB.exportData();
+        const payload = DataSafe.buildPayload(DB.getDevices());
+        const json = JSON.stringify(payload, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -408,7 +409,11 @@ const App = {
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const count = DB.importData(e.target.result);
+                const raw = e.target.result;
+                const count = DB.importData(raw);
+                try {
+                    DataSafe.restoreConfigFromPayload(JSON.parse(raw));
+                } catch { /* pas de bloc _datasafe valide, on ignore */ }
                 alert(`${count} appareil(s) importé(s) avec succès !`);
                 this.renderCurrentView();
                 DataSafe.push(DB.getDevices());

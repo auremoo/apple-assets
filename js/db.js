@@ -164,16 +164,7 @@ const DB = {
         };
     },
 
-    // --- Export / Import ---
-    exportData() {
-        const devices = this.getDevices();
-        return JSON.stringify({
-            version: 1,
-            exportDate: new Date().toISOString(),
-            devices
-        }, null, 2);
-    },
-
+    // --- Import ---
     importData(jsonString) {
         const data = JSON.parse(jsonString);
         if (!data.devices || !Array.isArray(data.devices)) {
