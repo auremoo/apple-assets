@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Apple Collection</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=CACHE_BUST">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -103,8 +103,8 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Couleur</label>
-                        <input type="text" id="device-color" placeholder="ex: Noir Sidéral">
+                        <label>Couleur <span class="required-mark">*</span></label>
+                        <input type="text" id="device-color" placeholder="ex: Noir Sidéral" required>
                     </div>
                     <div class="form-group">
                         <label>Stockage</label>
@@ -119,27 +119,31 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Date d'acquisition</label>
-                        <input type="date" id="device-date-acquired">
-                        <label class="date-precision-toggle">
-                            <input type="checkbox" id="device-date-acquired-imprecise">
-                            Jour inconnu (mois seulement)
-                        </label>
+                        <div class="label-row">
+                            <label>Date d'acquisition <span class="required-mark">*</span></label>
+                            <label class="date-precision-toggle">
+                                <input type="checkbox" id="device-date-acquired-imprecise">
+                                Mois seulement
+                            </label>
+                        </div>
+                        <input type="date" id="device-date-acquired" required>
                     </div>
                     <div class="form-group">
-                        <label>Date de cession <span class="required-mark" id="date-released-required-mark">*</span></label>
+                        <div class="label-row">
+                            <label>Date de cession <span class="required-mark" id="date-released-required-mark">*</span></label>
+                            <label class="date-precision-toggle">
+                                <input type="checkbox" id="device-date-released-imprecise">
+                                Mois seulement
+                            </label>
+                        </div>
                         <input type="date" id="device-date-released">
-                        <label class="date-precision-toggle">
-                            <input type="checkbox" id="device-date-released-imprecise">
-                            Jour inconnu (mois seulement)
-                        </label>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Mode d'acquisition</label>
-                        <select id="device-acquisition">
+                        <label>Mode d'acquisition <span class="required-mark">*</span></label>
+                        <select id="device-acquisition" required>
                             <option value="">Choisir...</option>
                             <option value="Neuf">Neuf</option>
                             <option value="Reconditionné">Reconditionné</option>
@@ -236,8 +240,8 @@
     </div>
 
     <script src="https://sql.js.org/dist/sql-wasm.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/datasafe.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/db.js?v=CACHE_BUST"></script>
+    <script src="js/datasafe.js?v=CACHE_BUST"></script>
+    <script src="js/app.js?v=CACHE_BUST"></script>
 </body>
 </html>

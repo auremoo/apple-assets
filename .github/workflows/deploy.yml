@@ -27,6 +27,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Cache-bust static assets
+        run: sed -i "s/CACHE_BUST/${{ github.sha }}/g" index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

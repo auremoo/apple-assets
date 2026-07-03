@@ -29,9 +29,11 @@ const App = {
             e.preventDefault();
             this.saveDevice();
         });
-        document.getElementById('device-type').addEventListener('change', (e) => e.target.classList.remove('invalid'));
-        document.getElementById('device-model').addEventListener('input', (e) => e.target.classList.remove('invalid'));
-        document.getElementById('device-date-released').addEventListener('input', (e) => e.target.classList.remove('invalid'));
+        [['device-type', 'change'], ['device-model', 'input'], ['device-color', 'input'],
+         ['device-date-acquired', 'input'], ['device-acquisition', 'change'],
+         ['device-date-released', 'input']].forEach(([id, evt]) => {
+            document.getElementById(id).addEventListener(evt, (e) => e.target.classList.remove('invalid'));
+        });
         document.getElementById('device-status').addEventListener('change', () => this.updateReleaseDateRequirement());
         this.setupDatePrecisionToggle('device-date-acquired', 'device-date-acquired-imprecise');
         this.setupDatePrecisionToggle('device-date-released', 'device-date-released-imprecise');
@@ -306,9 +308,10 @@ const App = {
 
         form.reset();
         document.getElementById('device-id').value = '';
-        document.getElementById('device-type').classList.remove('invalid');
-        document.getElementById('device-model').classList.remove('invalid');
-        document.getElementById('device-date-released').classList.remove('invalid');
+        ['device-type', 'device-model', 'device-color', 'device-date-acquired',
+         'device-acquisition', 'device-date-released'].forEach(id => {
+            document.getElementById(id).classList.remove('invalid');
+        });
         this.applyDateValue('device-date-acquired', 'device-date-acquired-imprecise', '');
         this.applyDateValue('device-date-released', 'device-date-released-imprecise', '');
 
@@ -387,15 +390,22 @@ const App = {
     saveDevice() {
         const typeEl = document.getElementById('device-type');
         const modelEl = document.getElementById('device-model');
+        const colorEl = document.getElementById('device-color');
+        const acquiredEl = document.getElementById('device-date-acquired');
+        const acquisitionEl = document.getElementById('device-acquisition');
         const releasedEl = document.getElementById('device-date-released');
-        [typeEl, modelEl, releasedEl].forEach(el => el.classList.remove('invalid'));
+        const requiredFields = [typeEl, modelEl, colorEl, acquiredEl, acquisitionEl, releasedEl];
+        requiredFields.forEach(el => el.classList.remove('invalid'));
 
-        let hasError = false;
         let firstInvalid = null;
-        if (!typeEl.value) { typeEl.classList.add('invalid'); hasError = true; firstInvalid = firstInvalid || typeEl; }
-        if (!modelEl.value.trim()) { modelEl.classList.add('invalid'); hasError = true; firstInvalid = firstInvalid || modelEl; }
-        if (releasedEl.required && !releasedEl.value) { releasedEl.classList.add('invalid'); hasError = true; firstInvalid = firstInvalid || releasedEl; }
-        if (hasError) {
+        requiredFields.forEach(el => {
+            if (el === releasedEl && !releasedEl.required) return;
+            if (!el.value.trim()) {
+                el.classList.add('invalid');
+                firstInvalid = firstInvalid || el;
+            }
+        });
+        if (firstInvalid) {
             firstInvalid.focus();
             return;
         }
@@ -404,12 +414,12 @@ const App = {
         const device = {
             type: typeEl.value,
             model: modelEl.value,
-            color: document.getElementById('device-color').value,
+            color: colorEl.value,
             storage: document.getElementById('device-storage').value,
             serial_number: document.getElementById('device-serial').value,
-            date_acquired: document.getElementById('device-date-acquired').value,
-            date_released: document.getElementById('device-date-released').value,
-            acquisition_mode: document.getElementById('device-acquisition').value,
+            date_acquired: acquiredEl.value,
+            date_released: releasedEl.value,
+            acquisition_mode: acquisitionEl.value,
             status: document.getElementById('device-status').value,
             price_buy: parseFloat(document.getElementById('device-price-buy').value) || null,
             price_sell: parseFloat(document.getElementById('device-price-sell').value) || null,
