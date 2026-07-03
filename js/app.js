@@ -31,6 +31,10 @@ const App = {
         });
         document.getElementById('device-type').addEventListener('change', (e) => e.target.classList.remove('invalid'));
         document.getElementById('device-model').addEventListener('input', (e) => e.target.classList.remove('invalid'));
+        document.getElementById('device-date-released').addEventListener('input', (e) => e.target.classList.remove('invalid'));
+        document.getElementById('device-status').addEventListener('change', () => this.updateReleaseDateRequirement());
+        this.setupDatePrecisionToggle('device-date-acquired', 'device-date-acquired-imprecise');
+        this.setupDatePrecisionToggle('device-date-released', 'device-date-released-imprecise');
 
         // Delete device
         document.getElementById('btn-delete-device').addEventListener('click', () => this.deleteDevice());
@@ -304,6 +308,9 @@ const App = {
         document.getElementById('device-id').value = '';
         document.getElementById('device-type').classList.remove('invalid');
         document.getElementById('device-model').classList.remove('invalid');
+        document.getElementById('device-date-released').classList.remove('invalid');
+        this.applyDateValue('device-date-acquired', 'device-date-acquired-imprecise', '');
+        this.applyDateValue('device-date-released', 'device-date-released-imprecise', '');
 
         if (deviceId) {
             const device = DB.getDevice(deviceId);
@@ -317,8 +324,8 @@ const App = {
             document.getElementById('device-color').value = device.color || '';
             document.getElementById('device-storage').value = device.storage || '';
             document.getElementById('device-serial').value = device.serial_number || '';
-            document.getElementById('device-date-acquired').value = device.date_acquired || '';
-            document.getElementById('device-date-released').value = device.date_released || '';
+            this.applyDateValue('device-date-acquired', 'device-date-acquired-imprecise', device.date_acquired || '');
+            this.applyDateValue('device-date-released', 'device-date-released-imprecise', device.date_released || '');
             document.getElementById('device-acquisition').value = device.acquisition_mode || '';
             document.getElementById('device-status').value = device.status || 'Possédé';
             document.getElementById('device-price-buy').value = device.price_buy || '';
@@ -330,7 +337,43 @@ const App = {
             deleteBtn.style.display = 'none';
         }
 
+        this.updateReleaseDateRequirement();
         modal.classList.add('active');
+    },
+
+    // Un input type="date" affiche AAAA-MM-JJ ; type="month" affiche AAAA-MM
+    // pour les dates dont on ne connaît que le mois.
+    applyDateValue(inputId, checkboxId, value) {
+        const input = document.getElementById(inputId);
+        const checkbox = document.getElementById(checkboxId);
+        const isMonthOnly = value.length === 7;
+        checkbox.checked = isMonthOnly;
+        input.type = isMonthOnly ? 'month' : 'date';
+        input.value = value;
+    },
+
+    setupDatePrecisionToggle(inputId, checkboxId) {
+        const input = document.getElementById(inputId);
+        const checkbox = document.getElementById(checkboxId);
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                input.type = 'month';
+                if (input.value.length === 10) input.value = input.value.slice(0, 7);
+            } else {
+                input.type = 'date';
+            }
+        });
+    },
+
+    // La date de cession est obligatoire tant que l'appareil n'est plus possédé.
+    updateReleaseDateRequirement() {
+        const status = document.getElementById('device-status').value;
+        const releasedInput = document.getElementById('device-date-released');
+        const requiredMark = document.getElementById('date-released-required-mark');
+        const isRequired = status !== 'Possédé';
+        releasedInput.required = isRequired;
+        requiredMark.style.display = isRequired ? '' : 'none';
+        if (!isRequired) releasedInput.classList.remove('invalid');
     },
 
     closeModal(modal) {
@@ -344,13 +387,16 @@ const App = {
     saveDevice() {
         const typeEl = document.getElementById('device-type');
         const modelEl = document.getElementById('device-model');
-        [typeEl, modelEl].forEach(el => el.classList.remove('invalid'));
+        const releasedEl = document.getElementById('device-date-released');
+        [typeEl, modelEl, releasedEl].forEach(el => el.classList.remove('invalid'));
 
         let hasError = false;
-        if (!typeEl.value) { typeEl.classList.add('invalid'); hasError = true; }
-        if (!modelEl.value.trim()) { modelEl.classList.add('invalid'); hasError = true; }
+        let firstInvalid = null;
+        if (!typeEl.value) { typeEl.classList.add('invalid'); hasError = true; firstInvalid = firstInvalid || typeEl; }
+        if (!modelEl.value.trim()) { modelEl.classList.add('invalid'); hasError = true; firstInvalid = firstInvalid || modelEl; }
+        if (releasedEl.required && !releasedEl.value) { releasedEl.classList.add('invalid'); hasError = true; firstInvalid = firstInvalid || releasedEl; }
         if (hasError) {
-            (typeEl.value ? modelEl : typeEl).focus();
+            firstInvalid.focus();
             return;
         }
 

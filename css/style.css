@@ -170,6 +170,30 @@ body {
     letter-spacing: 0.04em;
 }
 
+.required-mark {
+    color: var(--danger);
+}
+
+.date-precision-toggle {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.date-precision-toggle input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
 .form-group input,
 .form-group select,
 .form-group textarea {
