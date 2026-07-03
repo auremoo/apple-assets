@@ -22,6 +22,14 @@ const DB = {
     },
 
     createTables() {
+        // Anciennes bases (créées par la version avec comptes) ont encore une
+        // colonne devices.user_id NOT NULL. CREATE TABLE IF NOT EXISTS ne
+        // touche pas une table existante, donc il faut migrer explicitement.
+        const hasLegacySchema = this.hasLegacyUserIdColumn();
+        if (hasLegacySchema) {
+            this.instance.run('ALTER TABLE devices RENAME TO devices_legacy');
+        }
+
         this.instance.run(`
             CREATE TABLE IF NOT EXISTS devices (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +51,28 @@ const DB = {
             );
         `);
 
+        if (hasLegacySchema) {
+            this.instance.run(`
+                INSERT INTO devices (id, type, model, color, storage, serial_number,
+                    date_acquired, date_released, acquisition_mode, status,
+                    price_buy, price_sell, image_url, notes, created_at, updated_at)
+                SELECT id, type, model, color, storage, serial_number,
+                    date_acquired, date_released, acquisition_mode, status,
+                    price_buy, price_sell, image_url, notes, created_at, updated_at
+                FROM devices_legacy
+            `);
+            this.instance.run('DROP TABLE devices_legacy');
+            this.instance.run('DROP TABLE IF EXISTS users');
+        }
+
         this.save();
+    },
+
+    hasLegacyUserIdColumn() {
+        const result = this.instance.exec("PRAGMA table_info(devices)");
+        if (result.length === 0) return false;
+        const nameColumnIndex = result[0].columns.indexOf('name');
+        return result[0].values.some(row => row[nameColumnIndex] === 'user_id');
     },
 
     save() {
