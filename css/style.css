@@ -761,7 +761,7 @@ body {
     letter-spacing: -0.02em;
 }
 
-.modal-close {
+.modal-header .modal-close {
     background: var(--bg-secondary);
     border: none;
     font-size: 18px;
@@ -776,7 +776,7 @@ body {
     transition: all var(--transition);
     line-height: 1;
 }
-.modal-close:hover {
+.modal-header .modal-close:hover {
     background: var(--border-strong);
     color: var(--text);
 }
