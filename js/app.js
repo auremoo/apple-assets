@@ -463,9 +463,24 @@ const App = {
     async exportData() {
         if (DataSafe.isConfigured()) {
             const result = await DataSafe.push(DB.getDevices());
-            if (result && result.success) return;
+            if (result && result.success) {
+                this.showToast('☁️ Sauvegardé sur DataSafe');
+                return;
+            }
+            this.downloadLocalBackup();
+            this.showToast('⚠️ DataSafe indisponible — sauvegarde locale');
+            return;
         }
         this.downloadLocalBackup();
+        this.showToast('💾 Sauvegardé en local');
+    },
+
+    showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('visible');
+        clearTimeout(this._toastTimeout);
+        this._toastTimeout = setTimeout(() => toast.classList.remove('visible'), 2500);
     },
 
     downloadLocalBackup() {
