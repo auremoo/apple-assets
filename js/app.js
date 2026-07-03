@@ -29,6 +29,8 @@ const App = {
             e.preventDefault();
             this.saveDevice();
         });
+        document.getElementById('device-type').addEventListener('change', (e) => e.target.classList.remove('invalid'));
+        document.getElementById('device-model').addEventListener('input', (e) => e.target.classList.remove('invalid'));
 
         // Delete device
         document.getElementById('btn-delete-device').addEventListener('click', () => this.deleteDevice());
@@ -300,6 +302,8 @@ const App = {
 
         form.reset();
         document.getElementById('device-id').value = '';
+        document.getElementById('device-type').classList.remove('invalid');
+        document.getElementById('device-model').classList.remove('invalid');
 
         if (deviceId) {
             const device = DB.getDevice(deviceId);
@@ -338,10 +342,22 @@ const App = {
     },
 
     saveDevice() {
+        const typeEl = document.getElementById('device-type');
+        const modelEl = document.getElementById('device-model');
+        [typeEl, modelEl].forEach(el => el.classList.remove('invalid'));
+
+        let hasError = false;
+        if (!typeEl.value) { typeEl.classList.add('invalid'); hasError = true; }
+        if (!modelEl.value.trim()) { modelEl.classList.add('invalid'); hasError = true; }
+        if (hasError) {
+            (typeEl.value ? modelEl : typeEl).focus();
+            return;
+        }
+
         const id = document.getElementById('device-id').value;
         const device = {
-            type: document.getElementById('device-type').value,
-            model: document.getElementById('device-model').value,
+            type: typeEl.value,
+            model: modelEl.value,
             color: document.getElementById('device-color').value,
             storage: document.getElementById('device-storage').value,
             serial_number: document.getElementById('device-serial').value,
@@ -355,10 +371,16 @@ const App = {
             notes: document.getElementById('device-notes').value
         };
 
-        if (id) {
-            DB.updateDevice(parseInt(id), device);
-        } else {
-            DB.addDevice(device);
+        try {
+            if (id) {
+                DB.updateDevice(parseInt(id), device);
+            } else {
+                DB.addDevice(device);
+            }
+        } catch (err) {
+            console.error('saveDevice failed:', err);
+            alert('Erreur lors de l\'enregistrement : ' + err.message);
+            return;
         }
 
         this.closeModal();
